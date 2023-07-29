@@ -1,0 +1,128 @@
+.sales-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 2rem;
+  background-color: #ffffff;
+  gap: 1rem;
+  height: calc(100vh - 4rem);
+  overflow: hidden;
+}
+
+.sales-form-container h2 {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.sales-container .sales-form-container,
+.sales-container .sales-list-container,
+.sales-container .sales-list-container-full {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0.5rem 1rem rgba(140, 207, 156, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+.sales-container .sales-form-container {
+  flex: 0.25;
+  min-width: 300px;
+  max-height: 650px;
+}
+
+.sales-container .sales-list-container,
+.sales-container .sales-list-container-full {
+  flex: 1;
+  overflow: hidden;
+  max-height: 650px;
+}
+
+.sales-list-container .table-container,
+.sales-list-container-full .table-container {
+  max-height: 480px;
+  overflow-y: scroll;
+  border: 1px solid #8ccf9c;
+  border-radius: 4px;
+  box-shadow: 0 0.5rem 1rem rgba(140, 207, 156, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+form .form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+form input.form-input {
+  border: none;
+  background-color: #ffffff;
+  transition: border-color 0.3s ease;
+}
+
+form input.form-input:focus {
+  outline: none;
+  border-color: #71b885;
+}
+
+form button {
+  border: none;
+  height: 60px;
+  padding: 0.5rem;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+  text-transform: uppercase;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.btn-group button {
+  flex: 1;
+  margin-right: 0.5rem;
+  width: 100%;
+  border-radius: 10px;
+}
+
+form button:hover {
+  background-color: #eff7ef;
+}
+
+table th {
+  color: black;
+}
+
+table tr {
+  transition: background-color 0.3s ease;
+}
+
+table tr.table-success {
+  background-color: #d6e7ce;
+}
+
+table tr:hover {
+  background-color: #eff7ef;
+  cursor: pointer;
+}
+
+table td .cursor-pointer {
+  transition: color 0.3s ease;
+}
+
+table td .cursor-pointer:hover {
+  color: #71b885;
+}
+
+table td .text-warning {
+  color: #8ccf9c;
+}
+
+table td .text-danger {
+  color: #5da071;
+}
+
+table td .text-danger:hover {
+  color: #488056;
+}

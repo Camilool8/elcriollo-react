@@ -1,0 +1,36 @@
+/* Ventas.css */
+body {
+  background-color: #eff7ef;
+}
+
+.Container {
+  margin: 20px;
+}
+
+.Button {
+  margin: 10px;
+  background-color: #8ccf9c;
+  color: #ffffff;
+}
+
+.Button:hover {
+  background-color: #d6e7ce;
+}
+
+.Card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.CardContent {
+  flex-grow: 1;
+}
+
+.AddShoppingCartIcon, .RemoveShoppingCartIcon {
+  color: #8ccf9c;
+}
+
+.AddShoppingCartIcon:hover, .RemoveShoppingCartIcon:hover {
+  color: #d6e7ce;
+}

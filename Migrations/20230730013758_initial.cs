@@ -237,7 +237,8 @@ namespace PDVreact.Migrations
                     Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MesaId = table.Column<int>(type: "int", nullable: false),
                     MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Total = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {

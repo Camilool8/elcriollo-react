@@ -14,5 +14,6 @@ namespace PDVreact.DTOs
         public int MesaId { get; set; }
         public string MetodoPago { get; set; }
         public DateTime Fecha { get; set; }
+        public float Total { get; set; }
     }
 }

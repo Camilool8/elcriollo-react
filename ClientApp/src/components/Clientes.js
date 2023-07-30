@@ -156,13 +156,13 @@ function Clientes() {
               <Fab
                 color="primary"
                 aria-label="add"
-                style={{ position: "fixed", bottom: "20px", right: "20px" }}
+                style={{ position: "fixed", bottom: "32px", right: "20px" }}
                 onClick={() => {
                   setSelectedClient(null);
                   handleOpen();
                 }}
               >
-                <BsPlus />
+                <BsPlus fontSize={30} />
               </Fab>
             </Zoom>
             <Modal open={open} onClose={handleClose}>
@@ -314,12 +314,6 @@ function Clientes() {
                   filteredClients.map((client) => (
                     <TableRow
                       key={client.id}
-                      onClick={() => {
-                        if (user && user.rol === "Administrador") {
-                          setSelectedClient(client);
-                          handleOpen();
-                        }
-                      }}
                       sx={{
                         cursor: "pointer",
                         "&:hover": {
@@ -332,7 +326,12 @@ function Clientes() {
                       <TableCell>{client.telefono}</TableCell>
                       {user && user.rol === "Administrador" && (
                         <TableCell>
-                          <IconButton onClick={() => setSelectedClient(client)}>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedClient(client);
+                              handleOpen();
+                            }}
+                          >
                             <BsPencilSquare />
                           </IconButton>
                           <IconButton

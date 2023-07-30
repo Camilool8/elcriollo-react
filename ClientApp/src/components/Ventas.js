@@ -24,8 +24,7 @@ import {
   Paper,
   Box,
 } from "@mui/material";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
+import { BsDashSquare, BsPlusSquare } from "react-icons/bs";
 import _ from "lodash";
 import { useParams, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -35,13 +34,45 @@ import { BaseUrl } from "../services/apiUrl";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#8ccf9c",
+      main: "#da282d",
+      light: "#dd5b60", // rojo más claro
+      dark: "#a01f23", // rojo más oscuro
     },
     secondary: {
-      main: "#d6e7ce",
+      main: "#267abd",
+      light: "#5391cf", // azul más claro
+      dark: "#1c5a8a", // azul más oscuro
     },
+    error: {
+      main: "#d32f2f",
+    },
+    warning: {
+      main: "#ffa000",
+    },
+    info: {
+      main: "#1976d2",
+    },
+    success: {
+      main: "#4caf50",
+    },
+    contrastThreshold: 3,
+    tonalOffset: 0.2,
     background: {
-      default: "#eff7ef",
+      default: "#f6f3f6",
+      paper: "#ffffff",
+    },
+    text: {
+      primary: "#000000",
+      secondary: "#757575",
+      disabled: "#bdbdbd",
+      hint: "#9e9e9e",
+    },
+    action: {
+      active: "#000000",
+      hover: "rgba(0, 0, 0, 0.04)",
+      selected: "rgba(0, 0, 0, 0.08)",
+      disabled: "rgba(0, 0, 0, 0.26)",
+      disabledBackground: "rgba(0, 0, 0, 0.12)",
     },
   },
 });
@@ -57,63 +88,62 @@ const DividirCuenta = ({ modalOpen, setModalOpen, carrito, setCuentas }) => {
     ]);
   };
 
-const handleAsignacion = (event, productoId, producto) => {
-  const cuentaId = event.target.value;
-  const prevCuentaId = asignaciones[productoId];
+  const handleAsignacion = (event, productoId, producto) => {
+    const cuentaId = event.target.value;
+    const prevCuentaId = asignaciones[productoId];
 
-  // Actualizar las asignaciones
-  setAsignaciones((prevAsignaciones) => ({
-    ...prevAsignaciones,
-    [productoId]: cuentaId,
-  }));
+    // Actualizar las asignaciones
+    setAsignaciones((prevAsignaciones) => ({
+      ...prevAsignaciones,
+      [productoId]: cuentaId,
+    }));
 
-  // Actualizar cuentasInternas
-  setCuentasInterno((prevCuentas) => {
-    return prevCuentas.map((cuenta) => {
-      const cuentaCopy = { ...cuenta }; // Hacemos una copia de la cuenta actual
-      const existenteProductoIndex = cuentaCopy.productos.findIndex(
-        (p) => p.id === productoId
-      );
+    // Actualizar cuentasInternas
+    setCuentasInterno((prevCuentas) => {
+      return prevCuentas.map((cuenta) => {
+        const cuentaCopy = { ...cuenta }; // Hacemos una copia de la cuenta actual
+        const existenteProductoIndex = cuentaCopy.productos.findIndex(
+          (p) => p.id === productoId
+        );
 
-      // Si estamos asignando a esta cuenta
-      if (cuenta.id === Number(cuentaId)) {
-        const nuevoProducto = { ...producto, cantidad: producto.cantidad };
-        if (existenteProductoIndex > -1) {
+        // Si estamos asignando a esta cuenta
+        if (cuenta.id === Number(cuentaId)) {
+          const nuevoProducto = { ...producto, cantidad: producto.cantidad };
+          if (existenteProductoIndex > -1) {
+            const productoExistente = {
+              ...cuentaCopy.productos[existenteProductoIndex],
+            };
+            productoExistente.cantidad = producto.cantidad;
+            cuentaCopy.productos[existenteProductoIndex] = productoExistente;
+          } else {
+            cuentaCopy.productos.push(nuevoProducto);
+          }
+          cuentaCopy.total += producto.precio * nuevoProducto.cantidad; // Multiplicamos por la cantidad
+        }
+
+        // Si estamos desasignando de esta cuenta
+        else if (
+          cuenta.id === Number(prevCuentaId) &&
+          existenteProductoIndex > -1
+        ) {
           const productoExistente = {
             ...cuentaCopy.productos[existenteProductoIndex],
           };
-          productoExistente.cantidad = producto.cantidad;
-          cuentaCopy.productos[existenteProductoIndex] = productoExistente;
-        } else {
-          cuentaCopy.productos.push(nuevoProducto);
+          productoExistente.cantidad -= producto.cantidad;
+          if (productoExistente.cantidad <= 0) {
+            cuentaCopy.productos = cuentaCopy.productos.filter(
+              (p) => p.id !== productoId
+            );
+          } else {
+            cuentaCopy.productos[existenteProductoIndex] = productoExistente;
+          }
+          cuentaCopy.total -= producto.precio * producto.cantidad; // Restamos por la cantidad
         }
-        cuentaCopy.total += producto.precio * nuevoProducto.cantidad; // Multiplicamos por la cantidad
-      }
 
-      // Si estamos desasignando de esta cuenta
-      else if (
-        cuenta.id === Number(prevCuentaId) &&
-        existenteProductoIndex > -1
-      ) {
-        const productoExistente = {
-          ...cuentaCopy.productos[existenteProductoIndex],
-        };
-        productoExistente.cantidad -= producto.cantidad;
-        if (productoExistente.cantidad <= 0) {
-          cuentaCopy.productos = cuentaCopy.productos.filter(
-            (p) => p.id !== productoId
-          );
-        } else {
-          cuentaCopy.productos[existenteProductoIndex] = productoExistente;
-        }
-        cuentaCopy.total -= producto.precio * producto.cantidad; // Restamos por la cantidad
-      }
-
-      return cuentaCopy;
+        return cuentaCopy;
+      });
     });
-  });
-};
-
+  };
 
   const handleGuardar = () => {
     // Asignar las cuentas y asignaciones al estado principal de la aplicación
@@ -242,14 +272,25 @@ const handleAsignacion = (event, productoId, producto) => {
 };
 
 const FacturaCard = ({ factura, vendedor, cliente }) => (
-  <Card variant="outlined" style={{ marginBottom: "2rem", padding: "1rem" }}>
-    <Typography variant="h6">Factura {factura.id}</Typography>
-    <Typography>Vendedor: {vendedor.id}</Typography>
-    <Typography>Cliente: {cliente.nombre}</Typography>
-
-    <TableContainer component={Paper} style={{ marginTop: "1rem" }}>
-      <Table>
-        <TableHead>
+  <Card
+    variant="elevation"
+    elevation={3}
+    style={{
+      marginBottom: "2rem",
+      padding: "1rem",
+      backgroundColor: "#f5f5f5",
+    }}
+  >
+    <Typography variant="h5" color="textSecondary">
+      Factura {factura.id}
+    </Typography>
+    <Typography variant="subtitle1">
+      Fecha: {new Date().toLocaleString()}
+    </Typography>
+    <Typography variant="subtitle1">Vendedor: {vendedor.id}</Typography>
+    <TableContainer component={Paper} style={{ marginTop: "1rem", width: 500 }}>
+      <Table sx={{ minWidth: 500, border: "2px solid black" }}>
+        <TableHead sx={{ borderBottom: "2px dashed black" }}>
           <TableRow>
             <TableCell>Nombre</TableCell>
             <TableCell align="right">Cantidad</TableCell>
@@ -270,10 +311,29 @@ const FacturaCard = ({ factura, vendedor, cliente }) => (
       </Table>
     </TableContainer>
 
-    <Typography style={{ marginTop: "1rem" }}>
-      Subtotal: RD$ {factura.total}
+    <Typography
+      variant="p"
+      style={{
+        marginTop: "1rem",
+        display: "flex",
+        justifyContent: "flex-end",
+      }}
+    >
+      Subtotal: RD${factura.total}
     </Typography>
-    <Typography>Total: RD$ {factura.total}</Typography>
+    <Typography
+      variant="p"
+      style={{
+        marginTop: "0.1rem",
+        display: "flex",
+        justifyContent: "flex-end",
+      }}
+    >
+      ITBIS: RD${factura.total * 0.18}
+    </Typography>
+    <Typography variant="h5" style={{ marginTop: "1rem", fontWeight: "bold" }}>
+      Total: RD${factura.total * 1.18}
+    </Typography>
   </Card>
 );
 
@@ -311,25 +371,19 @@ const Facturar = ({
         alignItems: "center",
         justifyContent: "center",
         maxHeight: "100vh",
-        marginBottom: "4rem"
+        marginBottom: "4rem",
+        borderRadius: "25px",
       }}
     >
       <Card
         style={{
           minWidth: 500,
-          maxHeight: "600px",
+          maxHeight: "700px",
           padding: "1rem",
           overflowY: "scroll",
+          backgroundColor: "#f5f5f5",
         }}
       >
-        <Typography
-          variant="h6"
-          id="modal-modal-title"
-          component="h2"
-          style={{ marginBottom: "1rem" }}
-        >
-          Facturas
-        </Typography>
         <Grid container spacing={1}>
           {facturas.map((factura, idx) => {
             // Determine grid size based on the number of items
@@ -349,22 +403,30 @@ const Facturar = ({
             );
           })}
         </Grid>
+        <Typography
+          variant="h6"
+          id="modal-modal-title"
+          component="h2"
+          style={{ fontWeight: "bold" }}
+        >
+          Método de Pago
+        </Typography>
         <Select
           value={metodoPago1}
           onChange={(event) => setMetodoPago(event.target.value)}
+          style={{ width: "100%", marginBottom: "1rem" }}
         >
           <MenuItem value="Efectivo">Efectivo</MenuItem>
           <MenuItem value="Tarjeta">Tarjeta</MenuItem>
         </Select>
         <Button
           color="primary"
+          variant="contained"
           onClick={() => {
-            if (window.confirm("¿Estás seguro que deseas cerrar la venta?")) {
-              cerrarVenta(metodoPago1);
-              setModalOpen(false);
-            }
+            cerrarVenta(metodoPago1);
+            setModalOpen(false);
           }}
-          sx={{ marginLeft: "1rem", fontWeight: "bold", fontSize: "1.2rem" }}
+          sx={{ fontWeight: "bold", fontSize: "1.2rem" }}
         >
           Finalizar Venta
         </Button>
@@ -372,7 +434,6 @@ const Facturar = ({
     </Modal>
   );
 };
-
 
 const Ventas = () => {
   const { user } = useContext(AuthContext);
@@ -383,7 +444,7 @@ const Ventas = () => {
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [ventaExistente, setVentaExistente] = useState(false); // Variable para saber si la venta ya existe o no
   const [ventaActual, setVentaActual] = useState(null);
-  const { idMesa } = useParams();  
+  const { idMesa } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
   const [cuentas, setCuentas] = useState([]);
   const [facturarOpen, setFacturarOpen] = useState(false);
@@ -394,7 +455,6 @@ const Ventas = () => {
   };
 
   const navigate = useNavigate();
-  
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -498,7 +558,9 @@ const Ventas = () => {
     setCarrito((prevCart) =>
       prevCart.filter((item) => item.id !== producto.id)
     );
-    toast.error(`El producto ${producto.nombre} ha sido eliminado de la cuenta.`);
+    toast.error(
+      `El producto ${producto.nombre} ha sido eliminado de la cuenta.`
+    );
   };
 
   const handleSelectCliente = (event) => {
@@ -529,7 +591,9 @@ const Ventas = () => {
   };
 
   const updateDetalleVentasFromCart = (venta, carrito) => {
-    const detalleVentaIDs = venta.detalleVentas.map((detalle) => detalle.productoId);
+    const detalleVentaIDs = venta.detalleVentas.map(
+      (detalle) => detalle.productoId
+    );
     console.log("Detalle de venta IDs: ", detalleVentaIDs);
     console.log("Carrito: ", carrito);
     venta.detalleVentas.forEach((detalle) => {
@@ -555,25 +619,14 @@ const Ventas = () => {
             console.log("Detalle de venta actualizado.");
           })
           .catch((err) => console.error(err));
-
-          axios.put(`${BaseUrl}/api/Cuentas/${venta.cuentas[0].id}`, {
-            Total: _.sumBy(carrito, (item) => item.precio * item.cantidad),
-          });
       } else {
         // Si el producto no está en el carrito, borra el detalle de venta
         axios
-          .delete(
-            `https://localhost:7100/api/Ventas/${venta.id}/productos/${detalle.id}`
-          )
+          .delete(`${BaseUrl}/api/Ventas/${venta.id}/productos/${detalle.id}`)
           .then(() => console.log("Detalle de venta eliminado."))
           .catch((err) => console.error(err));
-
-          axios.put(`${BaseUrl}/api/Cuentas/${venta.cuenta.id}`, {
-            Total: _.sumBy(carrito, (item) => item.precio * item.cantidad),
-          });
       }
-    }
-    );
+    });
 
     // Para los nuevos productos en el carrito, añade nuevos detalles de venta
     console.log("Carrito: ", carrito);
@@ -599,7 +652,6 @@ const Ventas = () => {
     toast.success("La venta ha sido actualizada.");
   };
 
-
   const handleGuardarVenta = () => {
     const venta = {
       usuarioId: user.id,
@@ -620,7 +672,7 @@ const Ventas = () => {
           updateDetalleVentasFromCart(ventaActual, carrito); // Llama a addDetalleVentas con el ID de la venta actualizada
         })
         .catch((err) => console.error(err));
-    } 
+    }
 
     if (!ventaExistente) {
       axios
@@ -633,89 +685,98 @@ const Ventas = () => {
     }
   };
 
+  const handleVentaFinalizada = async (metodoPago1) => {
+    try {
+      // Crear una notificación toast y esperar a que termine
+      await toast.promise(
+        axios.put(`${BaseUrl}/api/Ventas/${ventaActual.id}`, {
+          ...ventaActual,
+          total: (
+            _.sumBy(carrito, (item) => item.precio * item.cantidad) * 1.18
+          ).toFixed(2),
+          estado: "Finalizada",
+          metodoPago: metodoPago1,
+        }),
+        {
+          success: "Venta finalizada",
+          error: "Error al finalizar la venta",
+        }
+      );
 
-const handleVentaFinalizada = async (metodoPago1) => {
-  try {
-    // Crear una notificación toast y esperar a que termine
-    await toast.promise(
-      axios.put(`${BaseUrl}/api/Ventas/${ventaActual.id}`, {
-        ...ventaActual,
-        estado: "Finalizada",
-        metodoPago: metodoPago1,
-      }),
-      {
-        success: "Venta finalizada",
-        error: "Error al finalizar la venta",
-      }
-    );
+      console.log("Venta finalizada.");
 
-    console.log("Venta finalizada.");
+      // Cambiar el estado de la mesa a "Libre"
+      await axios.put(`${BaseUrl}/Mesas/${idMesa}`, {
+        id: idMesa,
+        estado: "Libre",
+        ventas: [],
+        facturas: [],
+      });
+      console.log("Mesa liberada.");
 
-    // Cambiar el estado de la mesa a "Libre"
-    await axios.put(`${BaseUrl}/Mesas/${idMesa}`, {
-      id: idMesa,
-      estado: "Libre",
-      ventas: [],
-      facturas: [],
-    });
-    console.log("Mesa liberada.");
-
-    // Refrescar las mesas y redirigir a /mesas
-    navigate("/mesas");
-  } catch (error) {
-    console.error("Error al finalizar la venta y liberar la mesa", error);
-    toast.error("Error al finalizar la venta y liberar la mesa");
-  }
-};
-
+      // Refrescar las mesas y redirigir a /mesas
+      navigate("/mesas");
+    } catch (error) {
+      console.error("Error al finalizar la venta y liberar la mesa", error);
+      toast.error("Error al finalizar la venta y liberar la mesa");
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
-      <Container>
+      <Container
+        maxWidth="lg"
+        sx={{
+          backgroundColor: theme.palette.background.default,
+          maxHeight: "100vh",
+          py: 8,
+          borderRadius: "25px",
+        }}
+      >
         <ToastContainer />
-        <Grid
-          container
-          spacing={4}
-          sx={{
-            border: "1px solid #8ccf9c",
-            borderRadius: "5px",
-            padding: "2rem",
-            mt: "2rem",
-          }}
-        >
-          <Grid item xs={12} sm={8}>
-            {categorias.map((categoria) => (
-              <Button
-                variant="contained"
-                key={categoria.id}
-                onClick={() => handleCategoryClick(categoria.id)}
-                sx={{ mr: 2, mb: 2 }}
-              >
-                {categoria.nombre}
-              </Button>
-            ))}
-            <Grid container spacing={1} sx={{ my: 2, pr: 2 }}>
+        <Grid container spacing={4} sx={{ maxWidth: "100%" }}>
+          {/* Sección de Categorías */}
+          <Grid item xs={12}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 4 }}>
+              {categorias.map((categoria) => (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  key={categoria.id}
+                  onClick={() => handleCategoryClick(categoria.id)}
+                  sx={{
+                    mb: 2,
+                    fontWeight: "bold",
+                    fontSize: "1rem",
+                    padding: "1rem",
+                  }}
+                >
+                  {categoria.nombre}
+                </Button>
+              ))}
+            </Box>
+          </Grid>
+
+          {/* Sección de Productos */}
+          <Grid item xs={12} md={8}>
+            <Grid container spacing={2}>
               {productos.map((producto) => (
                 <Grid item key={producto.id} xs={12} sm={6} md={4}>
-                  <Card
-                    sx={{
-                      my: 2,
-                      borderColor: "#8ccf9c",
-                      borderWidth: "2px",
-                    }}
-                  >
+                  <Card sx={{ height: "100%" }}>
                     <CardContent>
                       <Typography gutterBottom variant="h5" component="h2">
                         {producto.nombre}
                       </Typography>
-                      <Typography>{producto.descripcion}</Typography>
+                      <Typography variant="body2">
+                        {producto.descripcion}
+                      </Typography>
                     </CardContent>
                     <CardActions>
                       <IconButton
                         color="primary"
                         onClick={() => handleAddToCart(producto, 1)}
                       >
-                        <AddShoppingCartIcon />
+                        <BsPlusSquare />
                       </IconButton>
                     </CardActions>
                   </Card>
@@ -723,99 +784,115 @@ const handleVentaFinalizada = async (metodoPago1) => {
               ))}
             </Grid>
           </Grid>
-          <Grid item xs={12} sm={4} sx={{ borderLeft: "1px solid #8ccf9c" }}>
-            <Typography
-              variant="h4"
-              gutterBottom
-              sx={{ fontWeight: "bold", mb: 2, fontSize: "1.2rem" }}
+
+          {/* Sección de Vendedor y Cliente */}
+          <Grid item xs={12} md={4}>
+            <Box
+              sx={{
+                backgroundColor: theme.palette.background.paper,
+                borderRadius: "25px",
+                boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+                p: 5,
+                border: "1px solid #ccc",
+              }}
             >
-              Vendedor: {user.nombre}
-            </Typography>
-            <Typography
-              variant="h4"
-              gutterBottom
-              sx={{ fontWeight: "bold", fontSize: "1.2rem" }}
-            >
-              Cliente:
-            </Typography>
-            <Select
-              value={
-                ventaActual ? ventaActual.clienteId : selectedCliente || ""
-              }
-              onChange={handleSelectCliente}
-              fullWidth
-              sx={{ mb: 2 }}
-            >
-              {clientes.map((cliente) => (
-                <MenuItem key={cliente.id} value={cliente.id}>
-                  {cliente.nombre}
-                </MenuItem>
-              ))}
-            </Select>
-            <div style={{ maxHeight: "200px", overflowY: "scroll" }}>
-              {carrito.map((producto, idx) => (
-                <div key={idx} sx={{ my: 2 }}>
-                  <Typography>
-                    || {producto.nombre} || x{producto.cantidad} = ${" "}
-                    {producto.precio * producto.cantidad} ||
-                  </Typography>
-                  <IconButton
-                    color="secondary"
-                    onClick={() => handleRemoveFromCart(producto)}
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                Cliente:
+              </Typography>
+              <Select
+                value={
+                  ventaActual ? ventaActual.clienteId : selectedCliente || ""
+                }
+                onChange={handleSelectCliente}
+                fullWidth
+                sx={{ mb: 2 }}
+              >
+                {clientes.map((cliente) => (
+                  <MenuItem key={cliente.id} value={cliente.id}>
+                    {cliente.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Box sx={{ maxHeight: "200px", overflowY: "scroll", mb: 2 }}>
+                {carrito.map((producto, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      my: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
                   >
-                    <RemoveShoppingCartIcon />
-                  </IconButton>
-                </div>
-              ))}
-            </div>
-            <Typography
-              variant="h4"
-              gutterBottom
-              sx={{ fontWeight: "bold", fontSize: "1.5rem", mt: 5, mb: 2 }}
-            >
-              Total: $ {_.sumBy(carrito, (item) => item.precio * item.cantidad)}
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mb: 2, width: "50%" }}
-              onClick={handleOpenModal}
-            >
-              Dividir Cuenta
-            </Button>
-            <Button
-              variant="contained"
-              color="warning"
-              sx={{ mb: 2, width: "50%" }}
-              onClick={handleGuardarVenta}
-            >
-              Guardar
-            </Button>
-            <DividirCuenta
-              modalOpen={modalOpen}
-              setModalOpen={setModalOpen}
-              carrito={carrito}
-              setCuentas={setCuentas}
-            />
-            <Button
-              variant="contained"
-              color="success"
-              sx={{ mb: 2, width: "100%" }}
-              onClick={handleMostrarFacturar}
-            >
-              Facturar
-            </Button>
-                <Facturar
-                  vendedor={user}
-                  cliente={clientePrueba}
-                  cuentas={cuentas}
-                  carrito={carrito}
-                  modalOpen={facturarOpen}
-                  setModalOpen={handleFacturarClose}
-                  cerrarVenta={handleVentaFinalizada}
-                  setMetodoPago={setMetodoPago}
-                  metodoPago1={metodoPago}
-                />
+                    <Typography>
+                      {producto.nombre} x {producto.cantidad} = $
+                      {producto.precio * producto.cantidad}
+                    </Typography>
+                    <IconButton
+                      color="secondary"
+                      onClick={() => handleRemoveFromCart(producto)}
+                    >
+                      <BsDashSquare />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+              <Typography
+                variant="h4"
+                gutterBottom
+                sx={{ fontWeight: "bold", fontSize: "1.5rem", mb: 2 }}
+              >
+                Total: ${" "}
+                {_.sumBy(carrito, (item) => item.precio * item.cantidad)}
+              </Typography>
+              <Button
+                variant="contained"
+                color="secondary"
+                fullWidth
+                sx={{ mb: 2 }}
+                onClick={handleOpenModal}
+              >
+                Dividir Cuenta
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                fullWidth
+                sx={{ mb: 2 }}
+                onClick={handleGuardarVenta}
+              >
+                Guardar
+              </Button>
+              <DividirCuenta
+                modalOpen={modalOpen}
+                setModalOpen={setModalOpen}
+                carrito={carrito}
+                setCuentas={setCuentas}
+              />
+              <Button
+                variant="contained"
+                color="success"
+                fullWidth
+                onClick={() => {
+                  handleMostrarFacturar();
+                  obtenerVentaMesa();
+                  obtenerVentaExistente();
+                }}
+              >
+                Facturar
+              </Button>
+              <Facturar
+                vendedor={user}
+                cliente={clientePrueba}
+                cuentas={cuentas}
+                carrito={carrito}
+                modalOpen={facturarOpen}
+                setModalOpen={handleFacturarClose}
+                cerrarVenta={handleVentaFinalizada}
+                setMetodoPago={setMetodoPago}
+                metodoPago1={metodoPago}
+              />
+            </Box>
           </Grid>
         </Grid>
       </Container>

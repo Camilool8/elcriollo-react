@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace PDVreact.Migrations
 {
     [DbContext(typeof(WebApiContext))]
-    [Migration("20230726145056_initial")]
+    [Migration("20230730013758_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -444,6 +444,9 @@ namespace PDVreact.Migrations
                     b.Property<string>("MetodoPago")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("Total")
+                        .HasColumnType("real");
 
                     b.Property<string>("UsuarioId")
                         .IsRequired()

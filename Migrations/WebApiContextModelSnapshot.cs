@@ -442,6 +442,9 @@ namespace PDVreact.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<float>("Total")
+                        .HasColumnType("real");
+
                     b.Property<string>("UsuarioId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
 import axios from "axios";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import {
   BsFillTrashFill,
@@ -11,6 +11,26 @@ import {
   BsX,
   BsArrowCounterclockwise,
 } from "react-icons/bs";
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  IconButton,
+  Fab,
+  Zoom,
+  MenuItem,
+} from "@mui/material";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Productos.css";
 import { BaseUrl } from "../services/apiUrl";
@@ -19,8 +39,11 @@ function Productos() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { user, loading, getToken } = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState("");
-  const { register, handleSubmit, reset, setValue } = useForm();
+  const { register, handleSubmit, reset, setValue, control } = useForm();
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const navigate = useNavigate();
 
@@ -216,166 +239,259 @@ function Productos() {
     return "Loading...";
   }
   return (
-    <div className="product-container row g-3">
-      {user && user.rol === "Administrador" && (
-        <div className="product-form-container p-4 bg-light rounded-3 shadow">
-          <h2 className="mb-4">Añadir / Editar Producto</h2>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-3">
-              <label className="form-label">Codigo</label>
-              <input
-                {...register("codigo")}
-                placeholder="Codigo"
-                className="form-control form-input"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Nombre</label>
-              <input
-                {...register("nombre")}
-                placeholder="Nombre"
-                className="form-control form-input"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Precio</label>
-              <input
-                {...register("precio")}
-                placeholder="Precio"
-                className="form-control form-input"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Cantidad</label>
-              <input
-                {...register("cantidad")}
-                placeholder="Cantidad"
-                className="form-control form-input"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Categoria</label>
-              <select
-                {...register("categoriaId")}
-                className="form-select form-input"
+    <Container>
+      <Grid container spacing={3}>
+        {user && user.rol === "Administrador" && (
+          <Grid item xs={12}>
+            <Zoom in={true}>
+              <Fab
+                color="primary"
+                aria-label="add"
+                style={{ position: "fixed", bottom: "32px", right: "20px" }}
+                onClick={() => {
+                  setSelectedProduct(null);
+                  handleOpen();
+                }}
               >
-                {categorias.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="btn-group">
-              <button type="submit" className="btn btn-outline-primary">
-                {selectedProduct ? (
-                  <>
-                    <BsPencilSquare />
-                    Editar
-                  </>
-                ) : (
-                  <>
-                    <BsPlus />
-                    Crear
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={clearForm}
-                className="btn btn-outline-danger"
+                <BsPlus fontSize={30} />
+              </Fab>
+            </Zoom>
+            <Modal open={open} onClose={handleClose}>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: 400,
+                  bgcolor: "background.paper",
+                  boxShadow: 24,
+                  p: 4,
+                }}
               >
-                <BsArrowCounterclockwise />
-                Limpiar
-              </button>
-              {selectedProduct && (
-                <button
-                  type="button"
-                  onClick={deselectProduct}
-                  className="btn btn-outline-secondary"
-                >
-                  <BsX />
-                  Deseleccionar
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-      )}
+                <Typography variant="h6" component="h2" mb={2} align="center">
+                  Añadir / Editar Producto
+                </Typography>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <TextField
+                    {...register("codigo")}
+                    label="Codigo"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
+                    {...register("nombre")}
+                    label="Nombre"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
+                    {...register("precio")}
+                    label="Precio"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
+                    {...register("cantidad")}
+                    label="Cantidad"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <Controller
+                    name="categoriaId"
+                    control={control}
+                    defaultValue="" // puedes cambiar esto al valor inicial que necesites
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        label="Categoria"
+                        fullWidth
+                        margin="normal"
+                      >
+                        {categorias.map((cat) => (
+                          <MenuItem key={cat.id} value={cat.id}>
+                            {cat.nombre}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
+                  <Box mt={2}>
+                    <Grid
+                      container
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Button
+                        type="submit"
+                        variant="outlined"
+                        color="primary"
+                        startIcon={
+                          selectedProduct ? <BsPencilSquare /> : <BsPlus />
+                        }
+                      >
+                        {selectedProduct ? "Editar" : "Crear"}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        startIcon={<BsArrowCounterclockwise />}
+                        onClick={clearForm}
+                      >
+                        Limpiar
+                      </Button>
+                      {selectedProduct && (
+                        <Button
+                          variant="outlined"
+                          startIcon={<BsX />}
+                          onClick={deselectProduct}
+                          sx={{ mt: 2 }}
+                        >
+                          Deseleccionar
+                        </Button>
+                      )}
+                    </Grid>
+                  </Box>
+                </form>
+              </Box>
+            </Modal>
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="h2" mb={1}>
+            Lista de Productos
+          </Typography>
+          <TextField
+            label="Buscar..."
+            fullWidth
+            onChange={handleSearch}
+            sx={{ mb: 2, border: "1px solid #ccc", borderRadius: "5px" }}
+          />
 
-      <div
-        className={
-          user && user.rol === "Administrador"
-            ? "product-list-container p-4 bg-light rounded-3 shadow"
-            : "product-list-container-full p-4 bg-light rounded-3 shadow"
-        }
-      >
-        <h2 className="mb-4">Lista de Productos</h2>
-        <input
-          type="text"
-          className="form-control form-input mb-4"
-          placeholder="Buscar..."
-          onChange={handleSearch} // Add onChange to capture user input
-        />
-        <div className="table-container">
-          <table className="table table-bordered table-striped table-hover">
-            <thead>
-              <tr>
-                <th>Codigo</th>
-                <th>Nombre</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Categoria</th>
-                {user && user.rol === "Administrador" && <th>Acciones</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.map((product) => (
-                <tr
-                  key={product.id}
-                  onClick={() => setSelectedProduct(product)}
-                  className={`${
-                    selectedProduct?.id === product.id ? "table-success" : ""
-                  }`}
-                >
-                  <td>{product.codigo}</td>
-                  <td>{product.nombre}</td>
-                  <td>{product.precio}</td>
-                  <td>
-                    {
-                      inventarios.find((inv) => inv.productoId === product.id)
-                        ?.cantidad
-                    }
-                  </td>
-                  <td>
-                    {
-                      categorias.find((cat) => cat.id === product.categoriaId)
-                        ?.nombre
-                    }
-                  </td>
+          <TableContainer
+            component={Paper}
+            sx={{ maxHeight: "70vh", overflowY: "scroll" }}
+          >
+            <Table>
+              <TableHead
+                sx={{
+                  backgroundColor: "#f5f5f5",
+                  fontWeight: "bold",
+                  fontSize: "1.2rem",
+                }}
+              >
+                <TableRow>
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    Codigo
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    Nombre
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    Precio
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    Cantidad
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    Categoria
+                  </TableCell>
                   {user && user.rol === "Administrador" && (
-                    <td>
-                      <BsPencilSquare
-                        onClick={() => setSelectedProduct(product)}
-                        className="me-2 text-warning cursor-pointer"
-                      />
-
-                      <BsFillTrashFill
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          mutationDelete.mutate(product.id);
-                        }}
-                        className="text-danger cursor-pointer"
-                      />
-                    </td>
+                    <TableCell
+                      sx={{
+                        position: "sticky",
+                        top: 0,
+                        backgroundColor: "#f5f5f5",
+                      }}
+                    >
+                      Acciones
+                    </TableCell>
                   )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredProducts.map((product) => (
+                  <TableRow
+                    key={product.id}
+                    sx={{
+                      "&:last-child td, &:last-child th": { border: 0 },
+                    }}
+                  >
+                    <TableCell>{product.codigo}</TableCell>
+                    <TableCell>{product.nombre}</TableCell>
+                    <TableCell>{product.precio}</TableCell>
+                    <TableCell>
+                      {
+                        inventarios.find((inv) => inv.productoId === product.id)
+                          ?.cantidad
+                      }
+                    </TableCell>
+                    <TableCell>
+                      {
+                        categorias.find((cat) => cat.id === product.categoriaId)
+                          ?.nombre
+                      }
+                    </TableCell>
+                    {user && user.rol === "Administrador" && (
+                      <TableCell>
+                        <IconButton
+                          aria-label="edit"
+                          onClick={() => {
+                            setSelectedProduct(product);
+                            handleOpen();
+                          }}
+                        >
+                          <BsPencilSquare />
+                        </IconButton>
+                        <IconButton
+                          aria-label="delete"
+                          onClick={() => {
+                            mutationDelete.mutate(product.id);
+                          }}
+                        >
+                          <BsFillTrashFill />
+                        </IconButton>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 

@@ -11,5 +11,7 @@
 
         public DateTime Fecha { get; set; }
 
+        public float Total { get; set; }
+
     }
 }

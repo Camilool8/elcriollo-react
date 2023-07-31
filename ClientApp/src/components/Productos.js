@@ -348,7 +348,7 @@ function Productos() {
                           onClick={deselectProduct}
                           sx={{ mt: 2 }}
                         >
-                          Deseleccionar
+                          Quitar seleccion
                         </Button>
                       )}
                     </Grid>
@@ -435,7 +435,7 @@ function Productos() {
                         backgroundColor: "#f5f5f5",
                       }}
                     >
-                      Acciones
+                      Editar/Borrar
                     </TableCell>
                   )}
                 </TableRow>

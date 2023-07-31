@@ -5,12 +5,31 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import {
-  BsFillTrashFill,
   BsPencilSquare,
+  BsFillTrashFill,
   BsPlus,
-  BsX,
   BsArrowCounterclockwise,
+  BsX,
 } from "react-icons/bs";
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  IconButton,
+  Fab,
+  Zoom,
+} from "@mui/material";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Categorias.css";
 import { BaseUrl } from "../services/apiUrl";
@@ -21,6 +40,10 @@ function Categorias() {
   const [searchTerm, setSearchTerm] = useState("");
   const { register, handleSubmit, reset, setValue } = useForm();
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
 
   const navigate = useNavigate();
 
@@ -128,119 +151,181 @@ function Categorias() {
   );
 
   return (
-    <div className="category-container row g-3">
-      {user && user.rol === "Administrador" && (
-        <div className="category-form-container p-4 bg-light rounded-3 shadow">
-          <h2 className="mb-4">Añadir / Editar Categoría</h2>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-3">
-              <label className="form-label">Nombre</label>
-              <input
-                {...register("nombre")}
-                placeholder="Nombre"
-                className="form-control form-input"
-              />
-            </div>
-            <div className="d-flex justify-content-between">
-              <div className="btn-group">
-                <button type="submit" className="btn btn-outline-primary">
-                  {selectedCategory ? (
-                    <>
-                      <BsPencilSquare />
-                      Editar
-                    </>
-                  ) : (
-                    <>
-                      <BsPlus />
-                      Crear
-                    </>
+    <Container>
+      <Grid container spacing={3}>
+        {user && user.rol === "Administrador" && (
+          <Grid item xs={12}>
+            <Zoom in={true}>
+              <Fab
+                color="primary"
+                aria-label="add"
+                style={{ position: "fixed", bottom: "32px", right: "20px" }}
+                onClick={() => {
+                  setSelectedCategory(null);
+                  handleOpen();
+                }}
+              >
+                <BsPlus fontSize={30} />
+              </Fab>
+            </Zoom>
+            <Modal open={open} onClose={handleClose}>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: 400,
+                  bgcolor: "background.paper",
+                  boxShadow: 24,
+                  p: 4,
+                }}
+              >
+                <Typography variant="h6" component="h2" mb={2} align="center">
+                  Añadir / Editar Categoría
+                </Typography>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <TextField
+                    {...register("nombre")}
+                    label="Nombre"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <Box mt={2}>
+                    <Grid
+                      container
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Button
+                        type="submit"
+                        variant="outlined"
+                        color="primary"
+                        startIcon={
+                          selectedCategory ? <BsPencilSquare /> : <BsPlus />
+                        }
+                      >
+                        {selectedCategory ? "Editar" : "Crear"}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        startIcon={<BsArrowCounterclockwise />}
+                        onClick={clearForm}
+                      >
+                        Limpiar
+                      </Button>
+                      {selectedCategory && (
+                        <Button
+                          variant="outlined"
+                          startIcon={<BsX />}
+                          onClick={deselectCategory}
+                          sx={{ mt: 2 }}
+                        >
+                          Quitar seleccion
+                        </Button>
+                      )}
+                    </Grid>
+                  </Box>
+                </form>
+              </Box>
+            </Modal>
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <Typography variant="h6" component="h2" mb={1}>
+            Lista de Categorías
+          </Typography>
+          <TextField
+            label="Buscar..."
+            fullWidth
+            onChange={handleSearch}
+            sx={{ mb: 2, border: "1px solid #ccc", borderRadius: "5px" }}
+          />
+          <TableContainer
+            component={Paper}
+            sx={{ maxHeight: "70vh", overflowY: "scroll" }}
+          >
+            <Table>
+              <TableHead
+                sx={{
+                  backgroundColor: "#f5f5f5",
+                  fontWeight: "bold",
+                  fontSize: "1.2rem",
+                }}
+              >
+                <TableRow>
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    Nombre
+                  </TableCell>
+                  {user && user.rol === "Administrador" && (
+                    <TableCell
+                      sx={{
+                        position: "sticky",
+                        top: 0,
+                        backgroundColor: "#f5f5f5",
+                      }}
+                    >
+                      Editar/Borrar
+                    </TableCell>
                   )}
-                </button>
-                <button
-                  type="button"
-                  onClick={clearForm}
-                  className="btn btn-outline-danger"
-                >
-                  <BsArrowCounterclockwise />
-                  Limpiar
-                </button>
-                {selectedCategory && (
-                  <button
-                    type="button"
-                    onClick={deselectCategory}
-                    className="btn btn-outline-secondary"
-                  >
-                    <BsX />
-                    Deseleccionar
-                  </button>
-                )}
-              </div>
-            </div>
-          </form>
-        </div>
-      )}
-
-      <div
-        className={
-          user && user.rol === "Administrador"
-            ? "category-list-container p-4 bg-light rounded-3 shadow"
-            : "category-list-container-full p-4 bg-light rounded-3 shadow"
-        }
-      >
-        <h2 className="mb-4">Lista de Categorías</h2>
-        <input
-          type="text"
-          className="form-control form-input mb-4"
-          placeholder="Buscar..."
-          onChange={handleSearch} 
-        />
-        <div className="table-container">
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                {user && user.rol === "Administrador" && <th>Acciones</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan="3">Cargando categorías...</td>
-                </tr>
-              ) : (
-                filteredCategories.map((category) => (
-                  <tr
-                    key={category.id}
-                    className={`${
-                      selectedCategory?.id === category.id ? "table-success" : ""
-                    }`}
-                    onClick={() => setSelectedCategory(category)}
-                  >
-                    <td>{category.nombre}</td>
-                    {user && user.rol === "Administrador" && (
-                      <td>
-                        <BsPencilSquare
-                          onClick={() => setSelectedCategory(category)}
-                          className="me-2 text-warning cursor-pointer"
-                        />
-                        <BsFillTrashFill
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            mutationDelete.mutate(category.id);
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={2}>Cargando categorías...</TableCell>
+                  </TableRow>
+                ) : (
+                  filteredCategories.map((category) => (
+                    <TableRow
+                      key={category.id}
+                      sx={{
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: "#f5f5f5",
+                        },
+                      }}
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      <TableCell>{category.nombre}</TableCell>
+                      {user && user.rol === "Administrador" && (
+                        <TableCell>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedCategory(category);
+                              handleOpen();
                             }}
-                            className="text-danger cursor-pointer"
-                            />
-                            </td>
-                            )}
-                            </tr>
-                            ))
-                            )}
-                            </tbody>
-                            </table>
-                            </div>
-                            </div>
-                            </div>
-                            );
+                          >
+                            <BsPencilSquare />
+                          </IconButton>
+                          <IconButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              mutationDelete.mutate(category.id);
+                            }}
+                          >
+                            <BsFillTrashFill />
+                          </IconButton>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
+      </Grid>
+    </Container>
+  );
+
                             }
 
 export default Categorias;

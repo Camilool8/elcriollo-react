@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace PDVreact.Migrations
 {
     [DbContext(typeof(WebApiContext))]
-    [Migration("20230730013758_initial")]
+    [Migration("20230730194609_initial")]
     partial class initial
     {
         /// <inheritdoc />

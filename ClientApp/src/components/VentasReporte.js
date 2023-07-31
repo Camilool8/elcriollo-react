@@ -5,7 +5,20 @@ import axios from "axios";
 import { useQuery } from "react-query";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./VentasReporte.css";
-import { BaseUrl } from "../services/apiUrl";
+import { BaseUrl } from "../services/apiUrl"; 
+import {
+  Container,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 function VentasReporte() {
   const { user, loading, getToken } = useContext(AuthContext);
@@ -40,57 +53,130 @@ function VentasReporte() {
 
   );
 
-  return (
-    <div className="sales-container row g-3">
-      <div className="sales-list-container-full p-4 bg-light rounded-3 shadow">
-        <h2 className="mb-4">Lista de ventas</h2>
-        <input
-          type="text"
-          className="form-control form-input mb-4"
-          placeholder="Buscar..."
-          onChange={handleSearch} // Add onChange to capture user input
+return (
+  <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h6" component="h2" mb={1}>
+          Lista de ventas
+        </Typography>
+        <TextField
+          label="Buscar..."
+          fullWidth
+          onChange={handleSearch}
+          sx={{ mb: 2, border: "1px solid #ccc", borderRadius: "5px" }}
         />
-        <div className="table-container">
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>ID Vendedor</th>
-                <th>Cliente</th>
-                <th>Productos Vendidos</th>
-                <th>Fecha</th>
-                <th>Método de Pago</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
+        <TableContainer
+          component={Paper}
+          sx={{ maxHeight: "70vh", overflowY: "scroll" }}
+        >
+          <Table>
+            <TableHead
+              sx={{
+                backgroundColor: "#f5f5f5",
+                fontWeight: "bold",
+                fontSize: "1.2rem",
+              }}
+            >
+              <TableRow>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#f5f5f5",
+                  }}
+                >
+                  Fecha
+                </TableCell>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#f5f5f5",
+                  }}
+                >
+                  UsuarioId
+                </TableCell>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#f5f5f5",
+                  }}
+                >
+                  Cliente
+                </TableCell>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#f5f5f5",
+                  }}
+                >
+                  Productos
+                </TableCell>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#f5f5f5",
+                  }}
+                >
+                  Método de Pago
+                </TableCell>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#f5f5f5",
+                  }}
+                >
+                  Estado
+                </TableCell>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#f5f5f5",
+                  }}
+                >
+                  Total
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {isLoading ? (
-                <tr>
-                  <td colSpan="6">Cargando ventas...</td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={7}>Cargando ventas...</TableCell>
+                </TableRow>
               ) : (
                 filteredSales.map((sale) => (
-                  <tr key={sale.id}>
-                    <td>{sale.usuarioId}</td>
-                    <td>{sale.cliente.nombre}</td>
-                    <td>
+                  <TableRow key={sale.id}>
+                    <TableCell>
+                      {new Date(sale.fecha).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{sale.usuarioId}</TableCell>
+                    <TableCell>{sale.cliente.nombre}</TableCell>
+                    <TableCell>
                       {sale.detalleVentas.map((detalle) => (
                         <div key={detalle.id}>
                           {detalle.producto.nombre} x {detalle.cantidad}
                         </div>
                       ))}
-                    </td>
-                    <td>{new Date(sale.fecha).toLocaleDateString()}</td>
-                    <td>{sale.metodoPago}</td>
-                    <td>{sale.estado}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{sale.metodoPago}</TableCell>
+                    <TableCell>{sale.estado}</TableCell>
+                    <TableCell>RD${sale.total}</TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Grid>
+    </Grid>
+  </Container>
+);
 }
 
 export default VentasReporte;

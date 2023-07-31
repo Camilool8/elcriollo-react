@@ -23,6 +23,7 @@ import {
   TableBody,
   Paper,
   Box,
+  Divider,
 } from "@mui/material";
 import { BsDashSquare, BsPlusSquare } from "react-icons/bs";
 import _ from "lodash";
@@ -76,6 +77,21 @@ const theme = createTheme({
     },
   },
 });
+
+const modalStyles = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  maxHeight: "100vh",
+  marginBottom: "4rem",
+};
+
+const cardStyles = {
+  minWidth: 500,
+  maxHeight: "600px",
+  padding: "1rem",
+  overflowY: "scroll",
+};
 
 const DividirCuenta = ({ modalOpen, setModalOpen, carrito, setCuentas }) => {
   const [cuentasInternas, setCuentasInterno] = useState([]);
@@ -154,115 +170,88 @@ const DividirCuenta = ({ modalOpen, setModalOpen, carrito, setCuentas }) => {
     setModalOpen(false);
   };
 
+  const renderProductCards = () => (
+    <Grid container spacing={3}>
+      {carrito.map((producto) => (
+        <Grid item xs={12} sm={6} md={4} key={producto.id}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">{producto.nombre}</Typography>
+              <Typography>Cantidad: {producto.cantidad}</Typography>
+              <Typography>Precio: RD${producto.precio}</Typography>
+              <Select
+                value={asignaciones[producto.id] || ""}
+                onChange={(event) =>
+                  handleAsignacion(event, producto.id, producto)
+                }
+              >
+                {cuentasInternas.map((cuenta) => (
+                  <MenuItem key={cuenta.id} value={cuenta.id}>
+                    {`Cuenta ${cuenta.id}`}
+                  </MenuItem>
+                ))}
+              </Select>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+
+  const renderAccountCards = () => (
+    <Grid container spacing={3}>
+      {cuentasInternas.map((cuenta) => (
+        <Grid item xs={12} sm={6} md={4} key={cuenta.id}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">{`Cuenta ${cuenta.id}`}</Typography>
+              <Typography>Total: RD${cuenta.total}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+
   return (
     <Modal
       open={modalOpen}
       onClose={() => setModalOpen(false)}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        maxHeight: "100vh",
-        marginBottom: "4rem",
-      }}
+      style={modalStyles}
     >
-      <Card
-        style={{
-          minWidth: 500,
-          maxHeight: "600px",
-          padding: "1rem",
-          overflowY: "scroll",
-        }}
-      >
-        <Typography
-          variant="h6"
-          id="modal-modal-title"
-          component="h2"
-          style={{ marginBottom: "1rem" }}
-        >
-          Dividir Cuenta
-        </Typography>
-        <Box>
-          <Button color="primary" onClick={handleAddCuenta}>
-            Añadir Cuenta
-          </Button>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Nombre</TableCell>
-                  <TableCell align="center">Cantidad</TableCell>
-                  <TableCell align="right">Precio</TableCell>
-                  <TableCell align="center">Cuenta</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {carrito.map((producto) => (
-                  <TableRow key={producto.id}>
-                    <TableCell component="th" scope="row">
-                      {producto.nombre}
-                    </TableCell>
-                    <TableCell align="right">{producto.cantidad}</TableCell>
-                    <TableCell align="right">RD${producto.precio}</TableCell>
-                    <TableCell align="right">
-                      <Select
-                        value={asignaciones[producto.id] || ""}
-                        onChange={(event) =>
-                          handleAsignacion(event, producto.id, producto)
-                        }
-                      >
-                        {cuentasInternas.map((cuenta) => (
-                          <MenuItem key={cuenta.id} value={cuenta.id}>
-                            {`Cuenta ${cuenta.id}`}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-        <>
+      <Card style={cardStyles}>
+        <CardContent>
           <Typography
-            variant="h6"
+            variant="h4"
             id="modal-modal-title"
             component="h2"
-            style={{ marginTop: "1rem" }}
+            style={{ marginBottom: "2rem" }}
           >
-            Cuentas
+            Dividir Cuenta
           </Typography>
-          <Box>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Cuenta</TableCell>
-                    <TableCell align="right">Total</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {cuentasInternas.map((cuenta) => (
-                    <TableRow key={cuenta.id}>
-                      <TableCell component="th" scope="row">
-                        {`Cuenta ${cuenta.id}`}
-                      </TableCell>
-                      <TableCell align="right">RD${cuenta.total}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        </>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddCuenta}
+            style={{ marginBottom: "2rem" }}
+          >
+            Añadir Cuenta
+          </Button>
+          {renderProductCards()}
+          <Divider variant="middle" style={{ margin: "2rem 0" }} />
+          {renderAccountCards()}
+        </CardContent>
         <CardActions>
-          <Button color="primary" onClick={handleGuardar}>
+          <Button variant="contained" color="primary" onClick={handleGuardar}>
             Guardar
           </Button>
-          <Button color="secondary" onClick={() => setModalOpen(false)}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => setModalOpen(false)}
+          >
             Cerrar
           </Button>
         </CardActions>
@@ -270,6 +259,7 @@ const DividirCuenta = ({ modalOpen, setModalOpen, carrito, setCuentas }) => {
     </Modal>
   );
 };
+
 
 const FacturaCard = ({ factura, vendedor, cliente }) => (
   <Card
@@ -288,8 +278,8 @@ const FacturaCard = ({ factura, vendedor, cliente }) => (
       Fecha: {new Date().toLocaleString()}
     </Typography>
     <Typography variant="subtitle1">Vendedor: {vendedor.id}</Typography>
-    <TableContainer component={Paper} style={{ marginTop: "1rem", width: 500 }}>
-      <Table sx={{ minWidth: 500, border: "2px solid black" }}>
+    <TableContainer component={Paper} style={{ marginTop: "1rem"}}>
+      <Table sx={{ border: "2px solid black" }}>
         <TableHead sx={{ borderBottom: "2px dashed black" }}>
           <TableRow>
             <TableCell>Nombre</TableCell>
@@ -559,7 +549,7 @@ const Ventas = () => {
       prevCart.filter((item) => item.id !== producto.id)
     );
     toast.error(
-      `El producto ${producto.nombre} ha sido eliminado de la cuenta.`
+      `Ha eliminado ${producto.nombre} del carrito. Cantidad: ${producto.cantidad}`
     );
   };
 
@@ -587,7 +577,7 @@ const Ventas = () => {
       VentaId: ventaId,
       Total: _.sumBy(carrito, (item) => item.precio * item.cantidad),
     });
-    toast.success("La venta ha sido creada.");
+    toast.info("Cuenta Guardada");
   };
 
   const updateDetalleVentasFromCart = (venta, carrito) => {
@@ -649,7 +639,7 @@ const Ventas = () => {
           .catch((err) => console.error(err));
       }
     });
-    toast.success("La venta ha sido actualizada.");
+    toast.info("Cuenta guardada.");
   };
 
   const handleGuardarVenta = () => {
@@ -718,7 +708,6 @@ const Ventas = () => {
       navigate("/mesas");
     } catch (error) {
       console.error("Error al finalizar la venta y liberar la mesa", error);
-      toast.error("Error al finalizar la venta y liberar la mesa");
     }
   };
 

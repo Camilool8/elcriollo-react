@@ -8,6 +8,9 @@ import {
   FaUserTie,
   FaSignOutAlt,
   FaTools,
+  FaList,
+  FaChartBar,
+  FaUsersCog,
 } from "react-icons/fa";
 import { Dropdown } from "react-bootstrap";
 import "./BarraNavegacion.css";
@@ -45,9 +48,17 @@ const BarraNavegacion = () => {
           <FaBeer size={40} /> Mesas
         </Link>
         {user?.rol === "Administrador" && (
-          <Link className="btn nav-button" to="/administracion">
-            <FaTools size={40} /> Herramientas
-          </Link>
+          <>
+            <Link className="btn nav-button" to="/categorias">
+              <FaList size={40} /> Categorias
+            </Link>
+            <Link className="btn nav-button" to="/reportes">
+              <FaChartBar size={40} /> Reportes
+            </Link>
+            <Link className="btn nav-button" to="/usuarios">
+              <FaUsersCog size={40} /> Usuarios
+            </Link>
+          </>
         )}
       </div>
       <Dropdown className="user-dropdown">

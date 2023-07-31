@@ -43,7 +43,7 @@ const MesaCard = ({ mesa, refreshMesas }) => {
         facturas: [],
       });
       refreshMesas();
-      toast.success(`Mesa No: ${mesa.id} Liberada`);
+      toast.info(`Mesa No: ${mesa.id} Liberada`);
     } catch (error) {
       console.error("Error al liberar la mesa", error);
       toast.error("Error al liberar la mesa");

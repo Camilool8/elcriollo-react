@@ -139,6 +139,7 @@ CREATE TABLE [Ventas] (
     [MesaId] int NOT NULL,
     [MetodoPago] nvarchar(max) NOT NULL,
     [Fecha] datetime2 NOT NULL,
+    [Total] real NOT NULL,
     CONSTRAINT [PK_Ventas] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_Ventas_AspNetUsers_UsuarioId] FOREIGN KEY ([UsuarioId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_Ventas_Clientes_ClienteId] FOREIGN KEY ([ClienteId]) REFERENCES [Clientes] ([Id]) ON DELETE CASCADE,
@@ -243,12 +244,11 @@ CREATE INDEX [IX_Ventas_UsuarioId] ON [Ventas] ([UsuarioId]);
 GO
 
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-VALUES (N'20230726145056_initial', N'7.0.9');
+VALUES (N'20230730194609_initial', N'7.0.9');
 GO
 
 COMMIT;
 GO
-
 
 
 

@@ -6,8 +6,10 @@ import Clientes from "./components/Clientes";
 import Productos from "./components/Productos";
 import Mesas from "./components/Mesas";
 import Ventas from "./components/Ventas"; // No olvides importar tu nuevo componente
-import Administracion from "./components/Administracion";
 import BarraNavegacion from "./components/BarraNavegacion";
+import Usuarios from "./components/Usuarios";
+import Categorias from "./components/Categorias";
+import VentasReporte from "./components/VentasReporte";
 import "./App.css";
 
 const AppRoutes = () => (
@@ -19,8 +21,10 @@ const AppRoutes = () => (
       <Route path="/clientes" element={<Clientes />} />
       <Route path="/productos" element={<Productos />} />
       <Route path="/mesas" element={<Mesas />} />
-      <Route path="/ventas/:idMesa" element={<Ventas />} /> {/* Nueva ruta */}
-      <Route path="/administracion" element={<Administracion />} />
+      <Route path="/ventas/:idMesa" element={<Ventas />} /> 
+      <Route path="/usuarios" element={<Usuarios />} />
+      <Route path="/categorias" element={<Categorias />} />
+      <Route path="/reportes" element={<VentasReporte />} />
     </Routes>
   </React.Fragment>
 );
